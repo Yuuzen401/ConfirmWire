@@ -124,7 +124,10 @@ class ConfirmWireOperator(bpy.types.Operator):
 
             indices.append((e.verts[0].index, e.verts[1].index))
 
-        coords = [v.co + obj.location for v in bm.verts]
+        coords = []
+        for v in bm.verts:
+            coords.append(v.co + obj.location)
+
         if prop.cw_is_flip_horizontal:
             coords = [(v[0]*-1, v[1], v[2]) for v in coords]
 
