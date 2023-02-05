@@ -90,3 +90,13 @@ def area_3d_view_tag_redraw_all():
     for area in bpy.context.screen.areas:
         if area.type == 'VIEW_3D':
             area.tag_redraw()
+
+def show_message_info(message):
+    def draw(self, context):
+        self.layout.label(text = message)
+    bpy.context.window_manager.popup_menu(draw, title = "Message", icon = "INFO")
+
+def show_message_error(message):
+    def draw(self, context):
+        self.layout.label(text = message)
+    bpy.context.window_manager.popup_menu(draw, title = 'Error', icon = 'ERROR')
