@@ -32,9 +32,13 @@ import math
 from gpu_extras.batch import batch_for_shader
 from .helper import *
 
+def update_cw_target(self, context):
+    ConfirmWireOperator.force_disable()
+
 class ConfirmWirePropertyGroup(bpy.types.PropertyGroup):
+
     # 対象オブジェクト
-    cw_target : bpy.props.PointerProperty(name = "target", type = bpy.types.Object, poll = lambda self, obj: obj.type == 'MESH')
+    cw_target : bpy.props.PointerProperty(name = "target", type = bpy.types.Object, poll = lambda self, obj: obj.type == 'MESH', update = update_cw_target)
     # 線の太さ
     cw_line_width : bpy.props.IntProperty(name = "width", default = 1, min = 1, max = 10)
     # 線の透明度
@@ -47,6 +51,8 @@ class ConfirmWirePropertyGroup(bpy.types.PropertyGroup):
     cw_is_modifier : bpy.props.BoolProperty(name = "modifier", default = False)
     # 隠れた線も表示するか
     cw_is_xray : bpy.props.BoolProperty(name = "xray", default = False)
+    # 処理可能な頂点数
+    cw_max_vertex : bpy.props.IntProperty(name = "max vertex", default = 100000, min = 10000, max = 200000)
 
 class ConfirmWireOperator(bpy.types.Operator):
     bl_idname = "confirm_wire.operator"
@@ -90,6 +96,14 @@ class ConfirmWireOperator(bpy.types.Operator):
                 bm.from_object(obj, depsgraph)
             else:
                 bm.from_mesh(obj.data)
+
+        # 頂点数が多すぎると負荷が高いため処理を中止する
+        vertex_count = len(bm.verts)
+        if vertex_count > prop.cw_max_vertex:
+            bm.free()
+            self.force_disable()
+            show_message_error('canceled because there are too many vertices.')
+            pass
 
         indices = []
         indices_xray = []
@@ -169,7 +183,6 @@ class ConfirmWirePanel(bpy.types.Panel):
         layout.separator()
 
         if prop.cw_target is None:
-            ConfirmWireOperator.force_disable()
             layout.enable = False
 
         # -------------------------------------------------
@@ -211,11 +224,15 @@ class ConfirmWirePanel(bpy.types.Panel):
         layout.separator()
         box = layout.box()
         row = box.row()
-        row.scale_y = 1.5
+        row.scale_y = 2
         if ConfirmWireOperator.is_enable():
-            row.operator(ConfirmWireOperator.bl_idname, text = "enable", depress = True) 
+            row.operator(ConfirmWireOperator.bl_idname, text = "Confirm Wire Enable", depress = True,  icon = "PAUSE") 
         else:
-            row.operator(ConfirmWireOperator.bl_idname, text = "enable", depress = False)
+            row.operator(ConfirmWireOperator.bl_idname, text = "Confirm Wire Enable", depress = False, icon = "PLAY")
+
+        layout.separator()
+        row = layout.row()
+        row.prop(prop, "cw_max_vertex", icon = "OUTLINER_DATA_MESH")
 
 classes = (
     ConfirmWirePropertyGroup,
