@@ -186,7 +186,7 @@ class ConfirmWirePanel(bpy.types.Panel):
         layout.separator()
 
         if prop.cw_target is None:
-            layout.enable = False
+            return
 
         # -------------------------------------------------
         box = layout.box()

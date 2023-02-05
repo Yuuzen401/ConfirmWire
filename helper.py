@@ -26,11 +26,8 @@ import math
 #         return None
 
 # アクティブなエリアのSpaceView3Dを取得する
-def get_space_view_3d(context):
+def get_space_view_3d():
     aria = bpy.context.area
-    if aria is None:
-        return None
-
     for space in aria.spaces:
         if space.type == 'VIEW_3D':
             return space
@@ -38,7 +35,7 @@ def get_space_view_3d(context):
         return None
 
 # def get_space_view_3d_euler_z(context):
-#     space_view_3d = get_space_view_3d(context)
+#     space_view_3d = get_space_view_3d()
 #     if space_view_3d:
 #         view_rotation = space_view_3d.region_3d.view_rotation
 #         return math.degrees(view_rotation.to_euler().z)
@@ -46,7 +43,7 @@ def get_space_view_3d(context):
 #         return None
 
 # def get_space_view_3d_vector(context):
-#     space_view_3d = get_space_view_3d(context)
+#     space_view_3d = get_space_view_3d()
 #     if space_view_3d:
 #         return space_view_3d.region_3d.view_location
 #     else:
@@ -60,7 +57,7 @@ def get_space_view_3d(context):
 
 # VIEW3Dの視点から、法線が内側であるか
 def is_in_normal_from_view_3d(context, normal):
-    space_view_3d = get_space_view_3d(context)
+    space_view_3d = get_space_view_3d()
     matrix_z = space_view_3d.region_3d.view_rotation.to_matrix().col[2]
     return normal.dot(matrix_z) < 0
 
