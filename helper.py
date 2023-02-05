@@ -14,13 +14,6 @@
 import bpy
 import math
 
-def get_area_view_3d(context):
-    for area in context.screen.areas:
-        if area.type == 'VIEW_3D':
-            return area
-    else:
-        return None
-
 # def get_region_view_3d(context):
 #     area = get_area_view_3d(context)
 #     if area is None:
@@ -32,9 +25,9 @@ def get_area_view_3d(context):
 #     else:
 #         return None
 
-# SpaceView3Dを取得する
+# アクティブなエリアのSpaceView3Dを取得する
 def get_space_view_3d(context):
-    aria = get_area_view_3d(context)
+    aria = bpy.context.area
     if aria is None:
         return None
 
