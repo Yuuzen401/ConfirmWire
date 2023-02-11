@@ -29,6 +29,8 @@ import gpu
 import bgl
 import bmesh
 import math
+
+from bpy.props import IntProperty, FloatProperty, FloatVectorProperty, BoolProperty, PointerProperty
 from gpu_extras.batch import batch_for_shader
 from .helper import *
 
@@ -38,21 +40,21 @@ def update_cw_target(self, context):
 class ConfirmWirePropertyGroup(bpy.types.PropertyGroup):
 
     # 対象オブジェクト
-    cw_target : bpy.props.PointerProperty(name = "target", type = bpy.types.Object, poll = lambda self, obj: obj.type == 'MESH', update = update_cw_target)
+    cw_target : PointerProperty(name = "target", type = bpy.types.Object, poll = lambda self, obj: obj.type == 'MESH', update = update_cw_target)
     # 線の太さ
-    cw_line_width : bpy.props.IntProperty(name = "width", default = 1, min = 1, max = 10)
+    cw_line_width : IntProperty(name = "width", default = 1, min = 1, max = 10)
     # 線の透明度
-    cw_line_alpha : bpy.props.FloatProperty(name = "alpha", default = 0.5, min = 0, max = 1, precision = 1)
+    cw_line_alpha : FloatProperty(name = "alpha", default = 0.5, min = 0, max = 1, precision = 1)
     # 線の色
-    cw_line_color : bpy.props.FloatVectorProperty(name = 'color', subtype = 'COLOR', min = 0.0, max = 1, default = (0.0, 1.0, 0.0) ,precision = 1)
+    cw_line_color : FloatVectorProperty(name = 'color', subtype = 'COLOR', min = 0.0, max = 1, default = (0.0, 1.0, 0.0) ,precision = 1)
     # 左右反転するか
-    cw_is_flip_horizontal : bpy.props.BoolProperty(name = "flip horizontal", default = False)
+    cw_is_flip_horizontal : BoolProperty(name = "flip horizontal", default = False)
     # モディファイアの評価を有効にするか
-    cw_is_modifier : bpy.props.BoolProperty(name = "modifier", default = False)
+    cw_is_modifier : BoolProperty(name = "modifier", default = False)
     # 隠れた線も表示するか
-    cw_is_xray : bpy.props.BoolProperty(name = "xray", default = False)
+    cw_is_xray : BoolProperty(name = "xray", default = False)
     # 処理可能な頂点数
-    cw_max_vertex : bpy.props.IntProperty(name = "max vertex", default = 100000, min = 10000, max = 200000)
+    cw_max_vertex : IntProperty(name = "max vertex", default = 100000, min = 10000, max = 200000)
 
 class ConfirmWireOperator(bpy.types.Operator):
     bl_idname = "confirm_wire.operator"
@@ -204,7 +206,7 @@ class ConfirmWirePanel(bpy.types.Panel):
 
         row = box.row()
         row.separator()
-        row.prop(context.scene.my_prop, "cw_line_color")
+        row.prop(prop, "cw_line_color")
 
         # -------------------------------------------------
         layout.separator()
@@ -246,7 +248,7 @@ classes = (
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    bpy.types.Scene.my_prop = bpy.props.PointerProperty(type=ConfirmWirePropertyGroup)
+    bpy.types.Scene.my_prop = bpy.props.PointerProperty(type = ConfirmWirePropertyGroup)
 
 def unregister():
     for cls in classes:
