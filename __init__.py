@@ -243,8 +243,7 @@ class ConfirmWirePanel(bpy.types.Panel):
         row.prop(prop, "cw_max_vertex", icon = "OUTLINER_DATA_MESH")
 
 class ConfirmWireUpdaterPanel(bpy.types.Panel):
-    """Panel to demo popup notice and ignoring functionality"""
-    bl_label = "Updater Demo Panel"
+    bl_label = "Updater ConfirmWire Panel"
     bl_idname = "OBJECT_PT_ConfirmWireUpdaterPanel_hello"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS' if bpy.app.version < (2, 80) else 'UI'
@@ -261,7 +260,7 @@ class ConfirmWireUpdaterPanel(bpy.types.Panel):
         # interval has passed.
         addon_updater_ops.check_for_update_background()
 
-        layout.label(text="Demo Updater Addon")
+        layout.label(text="ConfirmWire Updater Addon")
         layout.label(text="")
 
         col = layout.column()
@@ -280,7 +279,7 @@ class ConfirmWireUpdaterPanel(bpy.types.Panel):
 
 @addon_updater_ops.make_annotations
 class ConfirmWirePreferences(bpy.types.AddonPreferences):
-    """Demo bare-bones preferences"""
+    """ConfirmWire bare-bones preferences"""
     bl_idname = __package__
 
     # Addon updater preferences.
