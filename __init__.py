@@ -347,14 +347,11 @@ classes = (
     )
 
 def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-    bpy.types.Scene.confirm_wire_prop = bpy.props.PointerProperty(type = ConfirmWirePropertyGroup)
-
     addon_updater_ops.register(bl_info)
     for cls in classes:
         addon_updater_ops.make_annotations(cls)  # Avoid blender 2.8 warnings.
         bpy.utils.register_class(cls)
+    bpy.types.Scene.confirm_wire_prop = bpy.props.PointerProperty(type = ConfirmWirePropertyGroup)
 
 def unregister():
     for cls in classes:
