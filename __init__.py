@@ -15,7 +15,7 @@ bl_info = {
     "name": "ConfirmWire",
     "description": "check the edges",
     "author": "Yuuzen401",
-    "version": (0, 0, 2),
+    "version": (0, 0, 3),
     "blender": (2, 80, 0),
     "location":  "View3D > Sidebar > Confirm Wire",
     "warning": "",
@@ -131,7 +131,8 @@ class ConfirmWireOperator(bpy.types.Operator):
 
         coords = []
         for v in bm.verts:
-            coords.append(v.co + obj.location)
+            v.co = obj.matrix_world @ v.co
+            coords.append(v.co)
 
         if prop.cw_is_flip_horizontal:
             coords = [(v[0]*-1, v[1], v[2]) for v in coords]
