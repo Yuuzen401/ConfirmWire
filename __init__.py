@@ -15,7 +15,7 @@ bl_info = {
     "name": "ConfirmWire",
     "description": "check the edges",
     "author": "Yuuzen401",
-    "version": (0, 0, 3),
+    "version": (0, 0, 4),
     "blender": (2, 80, 0),
     "location":  "View3D > Sidebar > Confirm Wire",
     "warning": "",
@@ -33,6 +33,7 @@ import math
 from bpy.props import IntProperty, FloatProperty, FloatVectorProperty, BoolProperty, PointerProperty
 from gpu_extras.batch import batch_for_shader
 from .helper import *
+from .mesh_helpers import *
 
 # Updater ops import, all setup in this file.
 from . import addon_updater_ops
@@ -90,17 +91,7 @@ class ConfirmWireOperator(bpy.types.Operator):
     def __draw(self, context):
         prop = context.scene.confirm_wire_prop
         obj = prop.cw_target
-
-        if is_mesh_edit(obj):
-            bm = bmesh.from_edit_mesh(obj.data)
-        else:
-            bm = bmesh.new()
-            # モディファイアによる評価済のオブジェクトで描画するか
-            if (prop.cw_is_modifier):
-                depsgraph = context.evaluated_depsgraph_get()
-                bm.from_object(obj, depsgraph)
-            else:
-                bm.from_mesh(obj.data)
+        bm = bmesh_copy_from_object(obj, True, False, prop.cw_is_modifier)
 
         # 頂点数が多すぎると負荷が高いため処理を中止する
         vertex_count = len(bm.verts)
@@ -108,7 +99,7 @@ class ConfirmWireOperator(bpy.types.Operator):
             bm.free()
             self.force_disable()
             show_message_error('canceled because there are too many vertices.')
-            pass
+            return
 
         indices = []
         indices_xray = []
@@ -131,8 +122,8 @@ class ConfirmWireOperator(bpy.types.Operator):
 
         coords = []
         for v in bm.verts:
-            v.co = obj.matrix_world @ v.co
-            coords.append(v.co)
+            co = v.co.copy()
+            coords.append(co)
 
         if prop.cw_is_flip_horizontal:
             coords = [(v[0]*-1, v[1], v[2]) for v in coords]
