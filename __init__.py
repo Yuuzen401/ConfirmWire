@@ -15,7 +15,7 @@ bl_info = {
     "name": "ConfirmWire",
     "description": "check the edges",
     "author": "Yuuzen401",
-    "version": (0, 0, 4),
+    "version": (0, 0, 5),
     "blender": (2, 80, 0),
     "location":  "View3D > Sidebar > Confirm Wire",
     "warning": "",
@@ -211,11 +211,6 @@ class ConfirmWirePanel(bpy.types.Panel):
         row = layout.row()
         row.scale_y = 1.5
         row.prop(prop, "cw_is_modifier", icon = "MODIFIER")
-        
-        # 編集モードで評価済みのオブジェクトで描画できないため明示的に無効する
-        if is_mesh_edit(obj):
-            row.enabled = False
-
         row = layout.row()
         row.scale_y = 1.5
         row.prop(prop, "cw_is_xray", icon = "XRAY")
