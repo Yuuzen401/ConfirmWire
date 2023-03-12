@@ -15,7 +15,7 @@ bl_info = {
     "name": "ConfirmWire",
     "description": "check the edges",
     "author": "Yuuzen401",
-    "version": (0, 0, 5),
+    "version": (0, 0, 6),
     "blender": (2, 80, 0),
     "location":  "View3D > Sidebar > Confirm Wire",
     "warning": "",
@@ -165,7 +165,7 @@ class ConfirmWireOperator(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
-class ConfirmWirePanel(bpy.types.Panel):
+class VIEW3D_PT_ConfirmWirePanel(bpy.types.Panel):
     bl_label = "Confirm Wire"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -328,7 +328,7 @@ class ConfirmWirePreferences(bpy.types.AddonPreferences):
 classes = (
     ConfirmWirePropertyGroup,
     ConfirmWireOperator,
-    ConfirmWirePanel,
+    VIEW3D_PT_ConfirmWirePanel,
     ConfirmWirePreferences,
     ConfirmWireUpdaterPanel
     )
