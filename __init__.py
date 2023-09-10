@@ -15,7 +15,7 @@ bl_info = {
     "name": "ConfirmWire",
     "description": "check the edges",
     "author": "Yuuzen401",
-    "version": (0, 0, 6),
+    "version": (0, 0, 7),
     "blender": (2, 80, 0),
     "location":  "View3D > Sidebar > Confirm Wire",
     "warning": "",
@@ -27,13 +27,13 @@ bl_info = {
 import bpy
 import gpu
 import bgl
-import bmesh
 import math
 
 from bpy.props import IntProperty, FloatProperty, FloatVectorProperty, BoolProperty, PointerProperty
 from gpu_extras.batch import batch_for_shader
 from .helper import *
 from .mesh_helpers import *
+from .AnnoTation import *
 
 # Updater ops import, all setup in this file.
 from . import addon_updater_ops
@@ -165,6 +165,31 @@ class ConfirmWireOperator(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
+class ConfirmWireAnnoTationOperator(bpy.types.Operator):
+    bl_idname = "confirm_wire_annotation.operator"
+    bl_label = "Annotation"
+
+    def invoke(self, context, event):
+        if context.area.type == 'VIEW_3D':
+            obj = context.active_object
+            bm = bmesh_from_object(obj)
+            selected_edge_coords = AnnoTation.get_selected_edge_coords(bm, obj)
+            AnnoTation.selected_edge_to_annotation(context, selected_edge_coords)
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
+
+class ConfirmWireAnnoTationViewOperator(bpy.types.Operator):
+    bl_idname = "confirm_wire_annotation_view.operator"
+    bl_label = "Annotation View"
+
+    def invoke(self, context, event):
+        if context.area.type == 'VIEW_3D':
+            AnnoTation.toggle_annotation_view()
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
+
 class VIEW3D_PT_ConfirmWirePanel(bpy.types.Panel):
     bl_label = "Confirm Wire"
     bl_space_type = 'VIEW_3D'
@@ -229,40 +254,24 @@ class VIEW3D_PT_ConfirmWirePanel(bpy.types.Panel):
         row = layout.row()
         row.prop(prop, "cw_max_vertex", icon = "OUTLINER_DATA_MESH")
 
-class ConfirmWireUpdaterPanel(bpy.types.Panel):
-    bl_label = "Updater ConfirmWire Panel"
-    bl_idname = "OBJECT_PT_ConfirmWireUpdaterPanel_hello"
+
+class VIEW3D_PT_ConfirmWireAnnoTationPanel(bpy.types.Panel):
+    bl_label = "Confirm Wire AnnoTation"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS' if bpy.app.version < (2, 80) else 'UI'
-    bl_context = "objectmode"
-    bl_category = "Tools"
+    bl_region_type = 'UI'
+    bl_category = "Confirm Wire"
 
     def draw(self, context):
         layout = self.layout
-
-        # Call to check for update in background.
-        # Note: built-in checks ensure it runs at most once, and will run in
-        # the background thread, not blocking or hanging blender.
-        # Internally also checks to see if auto-check enabled and if the time
-        # interval has passed.
-        addon_updater_ops.check_for_update_background()
-
-        layout.label(text="ConfirmWire Updater Addon")
-        layout.label(text="")
-
-        col = layout.column()
-        col.scale_y = 0.7
-        col.label(text="If an update is ready,")
-        col.label(text="popup triggered by opening")
-        col.label(text="this panel, plus a box ui")
-
-        # Could also use your own custom drawing based on shared variables.
-        if addon_updater_ops.updater.update_ready:
-            layout.label(text="Custom update message", icon="INFO")
-        layout.label(text="")
-
-        # Call built-in function with draw code/checks.
-        addon_updater_ops.update_notice_box_ui(self, context)
+        row = layout.row()
+        row.scale_y = 1.5
+        row.operator(ConfirmWireAnnoTationOperator.bl_idname, text = "SelectToAnnoTation", icon = "GREASEPENCIL")
+        row = layout.row()
+        row.scale_y = 1.5
+        if AnnoTation.is_annotation_view():
+            row.operator(ConfirmWireAnnoTationViewOperator.bl_idname, text = "Hide", depress = True,  icon = "PAUSE") 
+        else:
+            row.operator(ConfirmWireAnnoTationViewOperator.bl_idname, text = "Show", depress = False, icon = "PLAY")
 
 @addon_updater_ops.make_annotations
 class ConfirmWirePreferences(bpy.types.AddonPreferences):
@@ -328,9 +337,11 @@ class ConfirmWirePreferences(bpy.types.AddonPreferences):
 classes = (
     ConfirmWirePropertyGroup,
     ConfirmWireOperator,
+    ConfirmWireAnnoTationOperator,
+    ConfirmWireAnnoTationViewOperator,
     VIEW3D_PT_ConfirmWirePanel,
+    VIEW3D_PT_ConfirmWireAnnoTationPanel,
     ConfirmWirePreferences,
-    ConfirmWireUpdaterPanel
     )
 
 def register():
