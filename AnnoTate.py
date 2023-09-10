@@ -14,9 +14,9 @@
 from .mesh_helpers import *
 from .grease_pencil_helpers import *
 
-class AnnoTation():
-    annotation_name = "__ConfirmWireWorkingTemporaryAnnotation__"
-    annotation_layer = None
+class AnnoTate():
+    annotate_name = "__ConfirmWireWorkingTemporaryAnnotate__"
+    annotate_layer = None
 
     @classmethod
     def get_selected_edge_coords(self, bm, obj):
@@ -33,26 +33,26 @@ class AnnoTation():
         return selected_edge_coords
 
     @classmethod
-    def init_annotation_layer(self, context):
-        self.remove_annotation_layer(context)
-        layer = get_gp_layer(context, self.annotation_name)
+    def init_annotate_layer(self, context):
+        self.remove_annotate_layer(context)
+        layer = get_gp_layer(context, self.annotate_name)
         layer.color = (0, 1, 1)
-        # layer.annotation_opacity = 0.1
+        # layer.annotate_opacity = 0.1
         layer.thickness = 10
-        self.annotation_layer = layer
+        self.annotate_layer = layer
 
     @classmethod
-    def remove_annotation_layer(self, context):
+    def remove_annotate_layer(self, context):
         gp = context.scene.grease_pencil
         if gp is not None:
             for layer in list(gp.layers) :
-                if self.annotation_name in layer.info :
+                if self.annotate_name in layer.info :
                     gp.layers.remove( layer )
 
     @classmethod
-    def selected_edge_to_annotation(self, context, selected_edge_coords):
-        self.init_annotation_layer(context)
-        frame = get_gp_frame(self.annotation_layer)
+    def selected_edge_to_annotate(self, context, selected_edge_coords):
+        self.init_annotate_layer(context)
+        frame = get_gp_frame(self.annotate_layer)
         for e in selected_edge_coords :
             stroke = frame.strokes.new()
             stroke.points.add(1)
@@ -60,20 +60,20 @@ class AnnoTation():
             stroke.points.add(1)
             stroke.points[-1].co = e[1][0]
             stroke.points.update()
-        self.annotation_layer.hide = False
+        self.annotate_layer.hide = False
 
     @classmethod
-    def toggle_annotation_view(self):
-        if self.is_annotation_view():
-            self.annotation_layer.hide = True
+    def toggle_annotate_view(self):
+        if self.is_annotate_view():
+            self.annotate_layer.hide = True
         else:
-            self.annotation_layer.hide = False
+            self.annotate_layer.hide = False
 
     @classmethod
-    def is_annotation_view(self):
-        if self.annotation_layer is None:
+    def is_annotate_view(self):
+        if self.annotate_layer is None:
             return False
         else:
             # hide が True なら 非表示になっているのでFalseを返す
             # hide が False なら 表示になっているのでTrueを返す
-            return not self.annotation_layer.hide
+            return not self.annotate_layer.hide
