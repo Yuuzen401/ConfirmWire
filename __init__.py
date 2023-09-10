@@ -33,7 +33,7 @@ from bpy.props import IntProperty, FloatProperty, FloatVectorProperty, BoolPrope
 from gpu_extras.batch import batch_for_shader
 from .helper import *
 from .mesh_helpers import *
-from .AnnoTation import *
+from .AnnoTate import *
 
 # Updater ops import, all setup in this file.
 from . import addon_updater_ops
@@ -165,38 +165,38 @@ class ConfirmWireOperator(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
-class ConfirmWireAnnoTationOperator(bpy.types.Operator):
-    bl_idname = "confirm_wire_annotation.operator"
-    bl_label = "Annotation"
+class ConfirmWireAnnoTateOperator(bpy.types.Operator):
+    bl_idname = "confirm_wire_annotate.operator"
+    bl_label = "Annotate"
 
     def invoke(self, context, event):
         if context.area.type == 'VIEW_3D':
             obj = context.active_object
             bm = bmesh_from_object(obj)
-            selected_edge_coords = AnnoTation.get_selected_edge_coords(bm, obj)
-            AnnoTation.selected_edge_to_annotation(context, selected_edge_coords)
+            selected_edge_coords = AnnoTate.get_selected_edge_coords(bm, obj)
+            AnnoTate.selected_edge_to_annotate(context, selected_edge_coords)
             return {'FINISHED'}
         else:
             return {'CANCELLED'}
 
-class ConfirmWireAnnoTationViewOperator(bpy.types.Operator):
-    bl_idname = "confirm_wire_annotation_view.operator"
-    bl_label = "Annotation View"
+class ConfirmWireAnnoTateViewOperator(bpy.types.Operator):
+    bl_idname = "confirm_wire_annotate_view.operator"
+    bl_label = "Annotate View"
 
     def invoke(self, context, event):
         if context.area.type == 'VIEW_3D':
-            AnnoTation.toggle_annotation_view()
+            AnnoTate.toggle_annotate_view()
             return {'FINISHED'}
         else:
             return {'CANCELLED'}
 
-class ConfirmWireAnnoTationRemoveOperator(bpy.types.Operator):
-    bl_idname = "confirm_wire_annotation_remove.operator"
-    bl_label = "Annotation Remove"
+class ConfirmWireAnnoTateRemoveOperator(bpy.types.Operator):
+    bl_idname = "confirm_wire_annotate_remove.operator"
+    bl_label = "Annotate Remove"
 
     def invoke(self, context, event):
         if context.area.type == 'VIEW_3D':
-            AnnoTation.remove_annotation_layer(context)
+            AnnoTate.remove_annotate_layer(context)
             return {'FINISHED'}
         else:
             return {'CANCELLED'}
@@ -210,7 +210,6 @@ class VIEW3D_PT_ConfirmWirePanel(bpy.types.Panel):
     def draw(self, context):
         prop = context.scene.confirm_wire_prop
         layout = self.layout
-        obj = prop.cw_target
 
         # -------------------------------------------------
         row = layout.row()
@@ -266,8 +265,8 @@ class VIEW3D_PT_ConfirmWirePanel(bpy.types.Panel):
         row.prop(prop, "cw_max_vertex", icon = "OUTLINER_DATA_MESH")
 
 
-class VIEW3D_PT_ConfirmWireAnnoTationPanel(bpy.types.Panel):
-    bl_label = "Confirm Wire AnnoTation"
+class VIEW3D_PT_ConfirmWireAnnoTatePanel(bpy.types.Panel):
+    bl_label = "Confirm Wire AnnoTate"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "Confirm Wire"
@@ -276,16 +275,16 @@ class VIEW3D_PT_ConfirmWireAnnoTationPanel(bpy.types.Panel):
         layout = self.layout
         row = layout.row()
         row.scale_y = 1.5
-        row.operator(ConfirmWireAnnoTationOperator.bl_idname, text = "Select To AnnoTation", icon = "GREASEPENCIL")
+        row.operator(ConfirmWireAnnoTateOperator.bl_idname, text = "Select To AnnoTate", icon = "GREASEPENCIL")
         row = layout.row()
         row.scale_y = 1.5
-        if AnnoTation.is_annotation_view():
-            row.operator(ConfirmWireAnnoTationViewOperator.bl_idname, text = "Hide", depress = True,  icon = "PAUSE") 
+        if AnnoTate.is_annotate_view():
+            row.operator(ConfirmWireAnnoTateViewOperator.bl_idname, text = "Hide", depress = True,  icon = "PAUSE") 
         else:
-            row.operator(ConfirmWireAnnoTationViewOperator.bl_idname, text = "Show", depress = False, icon = "PLAY")
+            row.operator(ConfirmWireAnnoTateViewOperator.bl_idname, text = "Show", depress = False, icon = "PLAY")
         row = layout.row()
         row.scale_y = 1.5
-        row.operator(ConfirmWireAnnoTationRemoveOperator.bl_idname, text = "Remove")
+        row.operator(ConfirmWireAnnoTateRemoveOperator.bl_idname, text = "Remove")
 
 @addon_updater_ops.make_annotations
 class ConfirmWirePreferences(bpy.types.AddonPreferences):
@@ -351,11 +350,11 @@ class ConfirmWirePreferences(bpy.types.AddonPreferences):
 classes = (
     ConfirmWirePropertyGroup,
     ConfirmWireOperator,
-    ConfirmWireAnnoTationOperator,
-    ConfirmWireAnnoTationViewOperator,
-    ConfirmWireAnnoTationRemoveOperator,
+    ConfirmWireAnnoTateOperator,
+    ConfirmWireAnnoTateViewOperator,
+    ConfirmWireAnnoTateRemoveOperator,
     VIEW3D_PT_ConfirmWirePanel,
-    VIEW3D_PT_ConfirmWireAnnoTationPanel,
+    VIEW3D_PT_ConfirmWireAnnoTatePanel,
     ConfirmWirePreferences,
     )
 
