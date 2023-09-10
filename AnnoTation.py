@@ -46,7 +46,7 @@ class AnnoTation():
         gp = context.scene.grease_pencil
         if gp is not None:
             for layer in list(gp.layers) :
-                if self.annotation_name or self.annotation_name in layer.info :
+                if self.annotation_name in layer.info :
                     gp.layers.remove( layer )
 
     @classmethod
@@ -66,12 +66,14 @@ class AnnoTation():
     def toggle_annotation_view(self):
         if self.is_annotation_view():
             self.annotation_layer.hide = True
-        else :
+        else:
             self.annotation_layer.hide = False
 
     @classmethod
     def is_annotation_view(self):
-        if self.annotation_layer is not None:
-            return self.annotation_layer.hide == False
-        else:
+        if self.annotation_layer is None:
             return False
+        else:
+            # hide が True なら 非表示になっているのでFalseを返す
+            # hide が False なら 表示になっているのでTrueを返す
+            return not self.annotation_layer.hide

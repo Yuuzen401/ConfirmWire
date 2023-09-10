@@ -15,7 +15,7 @@ bl_info = {
     "name": "ConfirmWire",
     "description": "check the edges",
     "author": "Yuuzen401",
-    "version": (0, 0, 7),
+    "version": (0, 0, 8),
     "blender": (2, 80, 0),
     "location":  "View3D > Sidebar > Confirm Wire",
     "warning": "",
@@ -190,6 +190,17 @@ class ConfirmWireAnnoTationViewOperator(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
+class ConfirmWireAnnoTationRemoveOperator(bpy.types.Operator):
+    bl_idname = "confirm_wire_annotation_remove.operator"
+    bl_label = "Annotation Remove"
+
+    def invoke(self, context, event):
+        if context.area.type == 'VIEW_3D':
+            AnnoTation.remove_annotation_layer(context)
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
+
 class VIEW3D_PT_ConfirmWirePanel(bpy.types.Panel):
     bl_label = "Confirm Wire"
     bl_space_type = 'VIEW_3D'
@@ -265,13 +276,16 @@ class VIEW3D_PT_ConfirmWireAnnoTationPanel(bpy.types.Panel):
         layout = self.layout
         row = layout.row()
         row.scale_y = 1.5
-        row.operator(ConfirmWireAnnoTationOperator.bl_idname, text = "SelectToAnnoTation", icon = "GREASEPENCIL")
+        row.operator(ConfirmWireAnnoTationOperator.bl_idname, text = "Select To AnnoTation", icon = "GREASEPENCIL")
         row = layout.row()
         row.scale_y = 1.5
         if AnnoTation.is_annotation_view():
             row.operator(ConfirmWireAnnoTationViewOperator.bl_idname, text = "Hide", depress = True,  icon = "PAUSE") 
         else:
             row.operator(ConfirmWireAnnoTationViewOperator.bl_idname, text = "Show", depress = False, icon = "PLAY")
+        row = layout.row()
+        row.scale_y = 1.5
+        row.operator(ConfirmWireAnnoTationRemoveOperator.bl_idname, text = "Remove")
 
 @addon_updater_ops.make_annotations
 class ConfirmWirePreferences(bpy.types.AddonPreferences):
@@ -339,6 +353,7 @@ classes = (
     ConfirmWireOperator,
     ConfirmWireAnnoTationOperator,
     ConfirmWireAnnoTationViewOperator,
+    ConfirmWireAnnoTationRemoveOperator,
     VIEW3D_PT_ConfirmWirePanel,
     VIEW3D_PT_ConfirmWireAnnoTationPanel,
     ConfirmWirePreferences,
