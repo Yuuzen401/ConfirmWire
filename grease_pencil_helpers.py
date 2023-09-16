@@ -14,7 +14,7 @@
 import bpy
 
 # from https://github.com/sakana3/PolyQuilt/tree/master/Addons/PolyQuilt / LICENSE GNU
-def get_gp_layer(context, layer_name = "Annotations") :
+def get_gp_layer(context, layer_name, new_layer = True) :
         gp = context.scene.grease_pencil
         if not gp:
             gp = bpy.data.grease_pencils.new("GP")
@@ -34,8 +34,9 @@ def get_gp_layer(context, layer_name = "Annotations") :
                         layer = l
                         break
             else :
-                layer = gp.layers.new(layer_name , set_active = gp.layers.active == None )
-                gp.layers.active = layer
+                if new_layer:
+                    layer = gp.layers.new(layer_name , set_active = gp.layers.active == None )
+                    gp.layers.active = layer
 
         return layer
 
