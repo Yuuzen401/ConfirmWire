@@ -11,6 +11,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import mathutils
+
 from .mesh_helpers import *
 from .grease_pencil_helpers import *
 
@@ -100,6 +102,42 @@ class Annotate():
             stroke.points[-1].co = e[1]
             # stroke.points[-1].co = e[1][0]
             stroke.points.update()
+
+    @classmethod
+    def annotate_to_select(self, context, index = -1):
+        annotate_layer = self.get_annotate_layer(context, index)
+        if annotate_layer is None:
+            return
+        frame = get_gp_frame(annotate_layer)
+        strokes = frame.strokes
+        co_list = []
+        for i, _stroke in enumerate(strokes):
+            stroke_points = strokes[i].points
+            for point in stroke_points :
+                co_list.append((point.co.x, point.co.y, point.co.z))
+
+        if co_list :
+            obj = bpy.context.edit_object
+            bm = bmesh_from_object(obj)
+            bm.select_flush(True)
+            bm.verts.ensure_lookup_table()
+            size = len(bm.verts)
+            kd = mathutils.kdtree.KDTree(size)
+            
+            for i, v in enumerate(bm.verts):
+                kd.insert(v.co, i)
+            
+            kd.balance()
+
+            for co in co_list :
+                co_find = co
+                co, v_index, dist = kd.find(co_find)
+                # 完全一致である場合のみ選択する
+                if 0 == dist :
+                    bm.verts[v_index].select = True
+
+            bm.select_flush_mode()
+            bmesh.update_edit_mesh(obj.data)
 
     # @classmethod
     # def toggle_annotate_view(self, index = -1):

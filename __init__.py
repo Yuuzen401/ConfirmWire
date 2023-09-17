@@ -15,7 +15,7 @@ bl_info = {
     "name": "ConfirmWire",
     "description": "check the edges",
     "author": "Yuuzen401",
-    "version": (0, 0, 9),
+    "version": (0, 0, 10),
     "blender": (2, 80, 0),
     "location":  "View3D > Sidebar > Confirm Wire",
     "warning": "",
@@ -61,6 +61,8 @@ class ConfirmWirePropertyGroup(PropertyGroup):
     cw_is_xray : BoolProperty(name = "xray", default = False)
     # 処理可能な頂点数
     cw_max_vertex : IntProperty(name = "max vertex", default = 100000, min = 10000, max = 200000)
+    # 作成可能なアノテート
+    cw_max_annotate : IntProperty(name = "max annotate", default = 10, min = 10, max = 40)
 
 def update_color(self, context):
     Annotate.set_annotate_layer_color(context, self.color, self.index)
@@ -232,7 +234,8 @@ class ConfirmWireAnnotateInitOperator(Operator) :
 
     def execute(self, context) :
         context.scene.confirm_wire_annotate_collection.clear()
-        for index in range(10):
+        cw_max_annotate = context.scene.confirm_wire_prop.cw_max_annotate
+        for index in range(cw_max_annotate):
             annotate_layer = Annotate.get_annotate_layer(context, index)
             new_item = context.scene.confirm_wire_annotate_collection.add()
             new_item.index = index
@@ -243,6 +246,31 @@ class ConfirmWireAnnotateInitOperator(Operator) :
                 new_item.color = annotate_layer.color
                 new_item.hide = annotate_layer.hide
 
+        return {'FINISHED'}
+
+class ConfirmWireAnnotateToSelectOperator(Operator) :
+    """アノテートから選択する
+    """
+
+    index: bpy.props.IntProperty(default = -1)
+
+    bl_idname = "confirm_wire_annotate_to_select.operator"
+    bl_label = ""
+    bl_description = ""
+
+    def execute(self, context) :
+        Annotate.annotate_to_select(context, self.index)
+        return {'FINISHED'}
+
+class ConfirmWireAnnotateDummyOperator(Operator) :
+    """ダミー
+    """
+
+    bl_idname = "confirm_wire_annotate_dummy.operator"
+    bl_label = ""
+    bl_description = ""
+
+    def execute(self, context) :
         return {'FINISHED'}
 
 class VIEW3D_PT_ConfirmWirePanel(Panel):
@@ -319,9 +347,18 @@ class VIEW3D_UL_ConfirmWireAnnotateListLayout(UIList) :
         # カラー
         op = sp.prop(item, "color", text = "")
 
-        # 選択
+        # 書き込み
         op = sp.operator(ConfirmWireAnnotateOperator.bl_idname, text = "", icon = "GREASEPENCIL")
         op.index = index
+
+        # 選択
+        obj = context.active_object
+        is_edit = obj and obj.mode == "EDIT" and obj.type == "MESH"
+        if is_edit :
+            op = sp.operator(ConfirmWireAnnotateToSelectOperator.bl_idname, text = "", icon = "SELECT_SET")
+            op.index = index
+        else :
+            sp.operator(ConfirmWireAnnotateDummyOperator.bl_idname, text = "")
 
         # 表示 / 非表示
         if item.hide:
@@ -345,8 +382,11 @@ class VIEW3D_PT_ConfirmWireAnnotatePanel(Panel):
     bl_category = "Confirm Wire"
 
     def draw(self, context):
+        prop = context.scene.confirm_wire_prop
         layout = self.layout
-        layout.label(text="Select To Annotate", text_ctxt = "Select To Annotate", icon = "MOD_LINEART")
+        layout.label(text="Select --> Annotate", text_ctxt = "Select --> Annotate", icon = "GREASEPENCIL")
+        row = layout.row()
+        layout.label(text="Annotate --> Select", text_ctxt = "Annotate --> Select", icon = "SELECT_SET")
         row = layout.row()
         layout.label(text="Display Annotate", text_ctxt = "Display Annotate", icon = "HIDE_OFF")
         layout.label(text="Remove Annotate", text_ctxt = "Remove Annotate", icon = "REMOVE")
@@ -360,8 +400,11 @@ class VIEW3D_PT_ConfirmWireAnnotatePanel(Panel):
             "confirm_wire_annotate_collection",
             context.scene,
             "confirm_wire_annotate_active_index",
-            rows = 10)
+            rows = prop.cw_max_annotate)
 
+        row = layout.row()
+        row.scale_y = 1.5
+        row.prop(prop, "cw_max_annotate")
         row = layout.row()
         row.scale_y = 1.5
         row.operator(ConfirmWireAnnotateInitOperator.bl_idname, text = "Reload")
@@ -436,6 +479,8 @@ classes = (
     # ConfirmWireAnnotateViewOperator,
     ConfirmWireAnnotateRemoveOperator,
     ConfirmWireAnnotateInitOperator,
+    ConfirmWireAnnotateToSelectOperator,
+    ConfirmWireAnnotateDummyOperator,
     VIEW3D_PT_ConfirmWirePanel,
     VIEW3D_PT_ConfirmWireAnnotatePanel,
     ConfirmWirePreferences,
