@@ -119,7 +119,6 @@ class Annotate():
         if co_list :
             obj = bpy.context.edit_object
             bm = bmesh_from_object(obj)
-            bm.select_flush(True)
             bm.verts.ensure_lookup_table()
             size = len(bm.verts)
             kd = mathutils.kdtree.KDTree(size)
@@ -136,8 +135,8 @@ class Annotate():
                 if 0 == dist :
                     bm.verts[v_index].select = True
 
-            bm.select_flush_mode()
             bmesh.update_edit_mesh(obj.data)
+            bm.select_flush(True)
 
     # @classmethod
     # def toggle_annotate_view(self, index = -1):
