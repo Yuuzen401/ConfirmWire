@@ -129,9 +129,9 @@ class Annotate():
             bm.verts.ensure_lookup_table()
             size = len(bm.verts)
             kd = mathutils.kdtree.KDTree(size)
-            
+
             for i, v in enumerate(bm.verts):
-                kd.insert(v.co, i)
+                kd.insert(obj.matrix_world @ v.co.copy(), i)
             
             kd.balance()
 
