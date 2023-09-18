@@ -36,13 +36,13 @@ class Annotate():
         return selected_edge_coords
 
     @classmethod
-    def init_annotate_layer(self, context, color, hide, index = -1):
+    def init_annotate_layer(self, context, color, hide, opacity, index = -1):
         self.remove_annotate_layer(context, index)
         annotate_layer = self.create_annotate_layer(context, index)
         annotate_layer.color = color
-        # annotate_layer.annotate_opacity = 0.1
-        annotate_layer.thickness = 10
         annotate_layer.hide = hide
+        annotate_layer.opacity = opacity
+        annotate_layer.thickness = 10
 
     @classmethod
     def set_annotate_layer_color(self, context, color, index = -1):        
@@ -57,6 +57,13 @@ class Annotate():
         if annotate_layer is None:
             return
         annotate_layer.hide = hide
+
+    @classmethod
+    def set_annotate_layer_opacity(self, context, opacity, index = -1):        
+        annotate_layer = self.get_annotate_layer(context, index)
+        if annotate_layer is None:
+            return
+        annotate_layer.opacity = opacity
 
     @classmethod
     def get_annotate_layer(self, context, index = -1):
@@ -87,8 +94,8 @@ class Annotate():
         return annotate_name
 
     @classmethod
-    def selected_edge_to_annotate(self, context, selected_edge_coords, color, hide, index = -1):
-        self.init_annotate_layer(context, color, hide, index)
+    def selected_edge_to_annotate(self, context, selected_edge_coords, color, hide, opacity, index = -1):
+        self.init_annotate_layer(context, color, hide, opacity, index)
         annotate_layer = self.get_annotate_layer(context, index)
         if annotate_layer is None:
             return

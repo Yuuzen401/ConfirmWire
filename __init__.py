@@ -15,7 +15,7 @@ bl_info = {
     "name": "ConfirmWire",
     "description": "check the edges",
     "author": "Yuuzen401",
-    "version": (0, 0, 10),
+    "version": (0, 0, 11),
     "blender": (2, 80, 0),
     "location":  "View3D > Sidebar > Confirm Wire",
     "warning": "",
@@ -64,16 +64,34 @@ class ConfirmWirePropertyGroup(PropertyGroup):
     # 作成可能なアノテート
     cw_max_annotate : IntProperty(name = "max annotate", default = 10, min = 10, max = 40)
 
+def update_hide(self, context):
+    Annotate.set_annotate_layer_hide(context, self.hide, self.index)
+
 def update_color(self, context):
     Annotate.set_annotate_layer_color(context, self.color, self.index)
 
-def update_hide(self, context):
-    Annotate.set_annotate_layer_hide(context, self.hide, self.index)
+@staticmethod
+def get_opacity_value(opacity: bool):
+    if opacity :
+        return 0.2
+    else :
+        return 1
+
+@staticmethod
+def get_opacity_bool(opacity: float):
+    if opacity == 1 :
+        return False
+    else :
+        return True
+
+def update_opacity(self, context):
+    Annotate.set_annotate_layer_opacity(context, get_opacity_value(self.opacity), self.index)
 
 class ConfirmWireAnnotateListPropertyGroup(PropertyGroup) :
     index: IntProperty(name = "confirm_wire_annotate_index", default = -1)
     hide: BoolProperty(name = "hide", default = False, update = update_hide)
     color: FloatVectorProperty(name = 'color', subtype = 'COLOR', min = 0.0, max = 1, default = (0.0, 1.0, 0.0), precision = 1, update = update_color)
+    opacity: BoolProperty(name = "opacity", default = False, update = update_opacity)
 
 class ConfirmWireOperator(Operator):
     bl_idname = "confirm_wire.operator"
@@ -193,8 +211,9 @@ class ConfirmWireAnnotateOperator(Operator):
             selected_edge_coords = Annotate.get_selected_edge_coords(bm, obj)
             color = context.scene.confirm_wire_annotate_collection[self.index].color
             hide = context.scene.confirm_wire_annotate_collection[self.index].hide
+            opacity = get_opacity_value(context.scene.confirm_wire_annotate_collection[self.index].opacity)
             
-            Annotate.selected_edge_to_annotate(context, selected_edge_coords, color, hide, self.index)
+            Annotate.selected_edge_to_annotate(context, selected_edge_coords, color, hide, opacity, self.index)
             return {'FINISHED'}
         else:
             return {'CANCELLED'}
@@ -245,6 +264,7 @@ class ConfirmWireAnnotateInitOperator(Operator) :
             else:
                 new_item.color = annotate_layer.color
                 new_item.hide = annotate_layer.hide
+                new_item.opacity =  get_opacity_bool(annotate_layer.opacity)
 
         return {'FINISHED'}
 
@@ -365,6 +385,13 @@ class VIEW3D_UL_ConfirmWireAnnotateListLayout(UIList) :
             sp.prop(item, "hide", text = "", icon = "HIDE_ON")
         else:
             sp.prop(item, "hide", text = "", icon = "HIDE_OFF")
+
+        # 透過
+        if item.opacity:
+            sp.prop(item, "opacity", text = "", icon = "XRAY")
+        else:
+            sp.prop(item, "opacity", text = "", icon = "XRAY")
+
         # if Annotate.is_annotate_view(index):
         #     op = sp.operator(ConfirmWireAnnotateViewOperator.bl_idname, text = "", depress = True,  icon = "HIDE_OFF") 
         # else:
@@ -389,6 +416,9 @@ class VIEW3D_PT_ConfirmWireAnnotatePanel(Panel):
         layout.label(text="Annotate --> Select", text_ctxt = "Annotate --> Select", icon = "SELECT_SET")
         row = layout.row()
         layout.label(text="Display Annotate", text_ctxt = "Display Annotate", icon = "HIDE_OFF")
+        row = layout.row()
+        layout.label(text="Opacity Annotate", text_ctxt = "Opacity Annotate", icon = "XRAY")
+        row = layout.row()
         layout.label(text="Remove Annotate", text_ctxt = "Remove Annotate", icon = "REMOVE")
         row = layout.row()
 
@@ -404,7 +434,7 @@ class VIEW3D_PT_ConfirmWireAnnotatePanel(Panel):
 
         row = layout.row()
         row.scale_y = 1.5
-        row.prop(prop, "cw_max_annotate")
+        row.prop(prop, "cw_max_annotate", text="Max Annotate")
         row = layout.row()
         row.scale_y = 1.5
         row.operator(ConfirmWireAnnotateInitOperator.bl_idname, text = "Reload")
