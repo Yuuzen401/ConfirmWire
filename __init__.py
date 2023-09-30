@@ -15,7 +15,7 @@ bl_info = {
     "name": "ConfirmWire",
     "description": "check the edges",
     "author": "Yuuzen401",
-    "version": (0, 0, 12),
+    "version": (0, 0, 13),
     "blender": (2, 80, 0),
     "location":  "View3D > Sidebar > Confirm Wire",
     "warning": "",
@@ -282,6 +282,66 @@ class ConfirmWireAnnotateToSelectOperator(Operator) :
         Annotate.annotate_to_select(context, self.index)
         return {'FINISHED'}
 
+class ConfirmWireShowEdgeSeamsOperator(Operator) :
+    """エッジのシーム表示を制御する
+    """
+    show_edge_seams: bpy.props.BoolProperty(default = True)
+
+    bl_idname = "confirm_wire_edge_seams.operator"
+    bl_label = ""
+    bl_description = ""
+
+    def execute(self, context) :
+        overlay = context.space_data.overlay
+        overlay.show_edge_seams = not self.show_edge_seams
+
+        return {'FINISHED'}
+
+class ConfirmWireShowEdgeBevelWeightOperator(Operator) :
+    """エッジのシーム表示を制御する
+    """
+    show_edge_bevel_weight: bpy.props.BoolProperty(default = True)
+
+    bl_idname = "confirm_wire_edge_bevel_weight.operator"
+    bl_label = ""
+    bl_description = ""
+
+    def execute(self, context) :
+        overlay = context.space_data.overlay
+        overlay.show_edge_bevel_weight = not self.show_edge_bevel_weight
+
+        return {'FINISHED'}
+
+class ConfirmWireShowEdgeCreaseOperator(Operator) :
+    """エッジのシーム表示を制御する
+    """
+    show_edge_crease: bpy.props.BoolProperty(default = True)
+
+    bl_idname = "confirm_wire_edge_crease.operator"
+    bl_label = ""
+    bl_description = ""
+
+    def execute(self, context) :
+        overlay = context.space_data.overlay
+        overlay.show_edge_crease = not self.show_edge_crease
+
+        return {'FINISHED'}
+
+class ConfirmWireShowEdgeSharpOperator(Operator) :
+    """エッジのシーム表示を制御する
+    """
+    show_edge_sharp: bpy.props.BoolProperty(default = True)
+
+    bl_idname = "confirm_wire_edge_sharp.operator"
+    bl_label = ""
+    bl_description = ""
+
+    def execute(self, context) :
+        overlay = context.space_data.overlay
+        overlay.show_edge_sharp = not self.show_edge_sharp
+
+        return {'FINISHED'}
+
 class ConfirmWireAnnotateDummyOperator(Operator) :
     """ダミー
     """
@@ -438,7 +498,34 @@ class VIEW3D_PT_ConfirmWireAnnotatePanel(Panel):
         row = layout.row()
         row.scale_y = 1.5
         row.operator(ConfirmWireAnnotateInitOperator.bl_idname, text = "Reload")
-        
+
+class VIEW3D_PT_ConfirmWireHelperPanel(Panel):
+    bl_label = "Confirm Wire Helper"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = "Confirm Wire"
+
+    def draw(self, context):
+        overlay = context.space_data.overlay
+        layout = self.layout
+        sp = layout.split(align=True, factor=0.5)
+
+        icon = "HIDE_OFF" if overlay.show_edge_crease else "HIDE_ON" 
+        op = sp.operator(ConfirmWireShowEdgeCreaseOperator.bl_idname, depress = overlay.show_edge_crease, text = "Crease", text_ctxt = "Crease", icon = icon)
+        op.show_edge_crease = overlay.show_edge_crease
+
+        icon = "HIDE_OFF" if overlay.show_edge_sharp else "HIDE_ON" 
+        op = sp.operator(ConfirmWireShowEdgeSharpOperator.bl_idname, depress = overlay.show_edge_sharp, text = "Sharp", text_ctxt = "Sharp", icon = icon)
+        op.show_edge_sharp = overlay.show_edge_sharp
+
+        sp = layout.split(align=True, factor=0.5)
+        icon = "HIDE_OFF" if overlay.show_edge_bevel_weight else "HIDE_ON" 
+        op = sp.operator(ConfirmWireShowEdgeBevelWeightOperator.bl_idname, depress = overlay.show_edge_bevel_weight, text = "Bevel", text_ctxt = "Bevel", icon = icon)
+        op.show_edge_bevel_weight = overlay.show_edge_bevel_weight
+
+        icon = "HIDE_OFF" if overlay.show_edge_seams else "HIDE_ON" 
+        op = sp.operator(ConfirmWireShowEdgeSeamsOperator.bl_idname, depress = overlay.show_edge_seams, text = "Seams", text_ctxt = "Seams", icon = icon)
+        op.show_edge_seams = overlay.show_edge_seams
 
 @addon_updater_ops.make_annotations
 class ConfirmWirePreferences(bpy.types.AddonPreferences):
@@ -510,9 +597,14 @@ classes = (
     ConfirmWireAnnotateRemoveOperator,
     ConfirmWireAnnotateInitOperator,
     ConfirmWireAnnotateToSelectOperator,
+    ConfirmWireShowEdgeSeamsOperator,
+    ConfirmWireShowEdgeBevelWeightOperator,
+    ConfirmWireShowEdgeCreaseOperator,
+    ConfirmWireShowEdgeSharpOperator,
     ConfirmWireAnnotateDummyOperator,
     VIEW3D_PT_ConfirmWirePanel,
     VIEW3D_PT_ConfirmWireAnnotatePanel,
+    VIEW3D_PT_ConfirmWireHelperPanel,
     ConfirmWirePreferences,
     VIEW3D_UL_ConfirmWireAnnotateListLayout,
     )
